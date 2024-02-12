@@ -64,7 +64,7 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working_directory: backend/mail
+                working-directory: backend/mail
 
         env:
             MAIL_USER: 9acfd4d73dfbd5
