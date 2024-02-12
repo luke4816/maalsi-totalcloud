@@ -1,0 +1,86 @@
+name: CI
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    api-db-test:
+        strategy:
+            matrix:
+                app: [core, auth]
+
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: backend/${{ matrix.app }}
+
+        services:
+            mariadb:
+                image: mariadb:latest
+                env:
+                    MARIADB_ROOT_PASSWORD: toor
+                    MARIADB_DATABASE: test
+                    MARIADB_USER: test
+                    MARIADB_PASSWORD: test
+                ports:
+                    - 3306:3306
+                options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+
+        env:
+            DB_HOST: 127.0.0.1
+            DB_NAME: test
+            DB_USER: test
+            DB_PASS: test
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Check database connection
+              run: |
+                  sudo apt-get install -y mysql-client
+                  mysql --host 127.0.0.1 --port 3306 -u root -ptoor -e "SHOW DATABASES"
+
+            - name: Setup node
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+            - name: Install Dependencies
+              run: npm ci
+
+            - name: Init database
+              run: npm run test:file init_bdd
+
+            - name: Add base user
+              run: mysql -u root -ptoor --database=test --host 127.0.0.1 --port 3306 -e "INSERT INTO `Users` VALUES ('roger','marcel','Le fou','roger@marcel.com','$2b$10$dQnCYjsOMEbsQXVaX8UnHONTTzqJXFcMElG89lP1zce6m0TW5vT5q');"
+
+            - name: Run tests
+              run: npm test
+
+    mail-test:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working_directory: backend/mail
+
+        env:
+            MAIL_USER: 9acfd4d73dfbd5
+            MAIL_PASSWORD: a15b3f766028ed
+
+        steps:
+            - name: Checkout
+              run: actions/checkout@v3
+
+            - name: Setup node
+              uses: actions/setup-nodes@v3
+              with:
+                  node_version: 18.x
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm test
