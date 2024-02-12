@@ -55,7 +55,7 @@ jobs:
               run: npm run test:file init_bdd
 
             - name: Add base user
-              run: mysql -u root -ptoor --database=test --host 127.0.0.1 --port 3306 -e "INSERT INTO `Users` VALUES ('roger','marcel','Le fou','roger@marcel.com','$2b$10$dQnCYjsOMEbsQXVaX8UnHONTTzqJXFcMElG89lP1zce6m0TW5vT5q');"
+              run: mysql -u root -ptoor --database=test --host 127.0.0.1 --port 3306 -e "INSERT INTO Users VALUES ('roger','marcel','Le fou','roger@marcel.com','$2b$10$dQnCYjsOMEbsQXVaX8UnHONTTzqJXFcMElG89lP1zce6m0TW5vT5q');"
 
             - name: Run tests
               run: npm test
@@ -75,7 +75,7 @@ jobs:
               run: actions/checkout@v3
 
             - name: Setup node
-              uses: actions/setup-nodes@v3
+              uses: actions/setup-node@v3
               with:
                   node_version: 18.x
 
