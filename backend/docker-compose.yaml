@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+    database:
+        image: mariadb:latest
+        container_name: maalsi-cocktails-database
+        environment:
+            - MYSQL_ROOT_PASSWORD=toor
+            - MYSQL_DATABASE=cocktails
+            - MYSQL_USER=cesi
+            - MYSQL_PASSWORD=isec
+        volumes:
+            - db_data:/var/lib/mysql
+
+    adminer:
+        image: adminer
+        container_name: maalsi-cocktails-adminer
+        depends_on:
+            - database
+        ports:
+            - 8080:8080
+
+    core:
+        container_name: maalsi-cocktails-api-core
+        depends_on:
+            - database
+        environment:
+            - DB_HOST=database
+            - PORT=9002
+        build: ./core
+
+    auth:
+        container_name: maalsi-cocktails-api-auth
+        depends_on:
+            - database
+        environment:
+            - DB_HOST=database
+            - PORT=9001
+        build: ./auth
+
+    mail:
+        container_name: maalsi-cocktails-api-mail
+        depends_on:
+            - database
+        environment:
+            - PORT=9003
+        build: ./auth
+
+    gateway:
+        container_name: maalsi-cocktails-api-gateway
+        depends_on:
+            - core
+            - auth
+            - mail
+        build: ./gateway
+        ports:
+            - 10000:12000
+        environment:
+            - HOST_CORE=core:9002
+            - HOST_AUTH=auth:9001
+            - HOST_MAIL=mail:9003
+        restart: always
+
+volumes:
+    db_data:
+
+networks:
+    cocktails-app:

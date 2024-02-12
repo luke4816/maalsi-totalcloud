@@ -1,0 +1,17 @@
+.menu {
+    flex-grow: 1;
+    border-right: solid 1px gray;
+}
+
+.menu ul {
+    list-style: none;
+}
+
+.menu ul li a {
+    text-decoration: none;
+    color: black;
+}
+
+.menu ul li a:hover {
+    text-decoration: underline;
+}
